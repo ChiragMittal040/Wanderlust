@@ -1,0 +1,121 @@
+ &#8377; <%= listing.price.toLocaleString("en-IN") ------> ₹  1,5500
+ <%= chat.created_at ? chat.created_at.toString().split(" ").slice(0, 4) : " "
+
+ // 1) Client side Validation :-  form bootstrap validation use { novalidation class needs-validation }
+ 
+ //2) Sucess Failure Text :-  require {input tags} {div class="invalid-feedback"> these arw corect 
+
+ //3) Custom Error handling :- 
+
+ app.post('/listings',async (req, res, next) =>{
+     try {
+     let listing = req.body.listing;
+     const newListing = new Listing(listing);
+     await newListing.save();
+     res.redirect('/listings');          
+     }catch(err){
+         next(err);
+     }
+     })
+ 
+     app.use((err, req, res, next) =>{
+    res.send('Something went wrong');
+})
+
+// 4) Add Wrap Async :- same work as above 
+app.use((err, req, res, next) =>{
+    res.send('Something went wrong');
+})
+
+
+module.exports = (fn) => {
+    return( req, res, next) => {
+        fn(req, res, next).catch(next)
+    }
+}
+
+  app.use((err, req, res, next) =>{
+        res.send('Something went wrong');
+    })
+
+// 5) Add ExpressError :- util ---> ExpressError
+ class ExpressError extends Error {
+    constructor(statusCode, message) {
+        super()
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+}
+
+module.exports = ExpressError;
+app.post('/listings',wrapAsync(async (req, res, next) =>{
+    if(!req.body.listing){
+        throw new ExpressError(400, 'Send valid data for listing');
+    }     
+// all alerrt 
+app.use((err, req, res, next) =>{
+        let{statusCode=500, message='Something went wrong!'} = err;
+        res.status(statusCode).render('error.ejs', {message})
+    })
+
+// 6) Error.ejs :- views --> error.ejs 
+
+<% layout("../layouts/boilerplate")  %>
+<div class="row mt-3">   
+<div class="alert alert-danger col-6 offset-3" role="alert">
+ <p><%= message %></p>
+</div>
+</div>
+
+app.use((err, req, res, next) =>{
+        let{statusCode=500, message='Something went wrong!'} = err;
+        res.status(statusCode).render('error.ejs', {message})
+    })
+
+// 7) Schema Validation :- define particular of an properties in the Schema 
+if(!req.body.listing){
+        throw new ExpressError(400, 'Send valid data for listing');
+    }     
+    if(!req.body.title){
+        throw new ExpressError(400, 'Title is Missing');
+    }     
+    if(!req.body.description){
+        throw new ExpressError(400, 'description is misssing');
+    }   
+    
+    or 
+    const Joi = require ('joi');
+    
+    module.exports.listingSchema = Joi.object ({
+        listing : Joi.object ({
+            title :Joi.string().required(),
+            description : Joi.string().required(),
+            price : Joi.number().required().min(0),
+            location : Joi.string().required(),
+            country : Joi.string().required(),
+            image : Joi.string().allow("", null)
+        }).required()
+    });
+
+    app.post('/listings',wrapAsync(async (req, res, next) =>{
+    let result = listingSchema.validate(req.body)
+    console.log(result);
+    if(result.error) {
+        throw new ExpressError(400, result.error);
+    }  
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect('/listings');               
+    }))
+
+    // 8) Validation Schema (Middleware) :- 
+
+    const validateListing = (req, res, next) =>{
+        let {error} = listingSchema.validate(req.body);
+        if(error) {
+            let errMsg = error.details.map((el) => el.message).join(",")
+            throw new ExpressError (400, errMsg)
+        }else {
+            next();
+        }        
+    };

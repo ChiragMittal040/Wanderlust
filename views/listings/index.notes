@@ -1,0 +1,24 @@
+<body>
+    
+    <ul>    <% for(let listing of allListings)  { %>
+        <li><h2><a href="/listings/<%= listing._id %>"><%=listing.title %></a></h2></li>
+         <div>
+        <!-- <form method="get" action="/listings/<%= listing._id%>/edit"> 
+            <button>Edit</button>
+        </form> -->
+         
+         <div>
+        <br>
+         
+        <form method="post" action="/listings/<%= listing._id%>?_method=DELETE"> 
+            <button>Delete</button>
+        </form>
+        </div>         
+   <% } %>
+   
+        
+   </ul>
+   <form method="get" action="/listings/create">
+    <button>Create New Account</button>
+   </form>
+</body>
